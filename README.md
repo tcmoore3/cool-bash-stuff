@@ -1,7 +1,7 @@
 # cool-bash-stuff
 A collection of useful (and cool!) bash scripts
 
-These scripts work for me on a 2015 MacBook Pro running macOS Sierra with GNU Bash version 3.2.57. I cannot guarantee they will work for you. I am always open for suggestions how to make these scripts more portable and/or robust. 
+These scripts work for me on a 2015 MacBook Pro running macOS Sierra with GNU Bash version 3.2.57. I cannot guarantee they will work for you. I am always open for suggestions on how to make these scripts more portable and/or robust. 
 
 ## Examples
 ```cdpsid``` is a useful function for changing to a directory where something is running, but you cannot remember which directory that is.
