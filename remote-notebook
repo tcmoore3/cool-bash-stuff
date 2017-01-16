@@ -34,7 +34,7 @@ ssh ${REMOTE_HOST} /bin/bash << EOF
         echo waiting
         sleep 1
     done
-    lsof -Pi :${REMOTE_PORT} -sTCP:LISTEN | awk 'NR==2 {print \$2}' > $HOME/.jupyter-notebook-remote-pid.tmp
+    lsof -Pi :${REMOTE_PORT} -sTCP:LISTEN | awk 'NR==2 {print \$2}' > \$HOME/.jupyter-notebook-remote-pid.tmp
 EOF
 
 ssh -N -f -L localhost:${LOCAL_PORT}:localhost:${REMOTE_PORT} ${REMOTE_HOST}
