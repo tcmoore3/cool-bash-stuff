@@ -1,0 +1,47 @@
+#!/bin/bash
+
+
+HELP_MSG='
+Help message.\n\n
+Options are:\n
+-r    remote port\n
+-s    remote host, e.g., user@domain.net\n
+-d    remote directory to launch the notebook from\n
+-l    local port\n
+-h    show this message\n
+ '
+
+REMOTE_PORT='6969'
+REMOTE_DIR=''
+LOCAL_PORT='8889'
+while getopts 'r:s:d:l:' flag; do
+    case "${flag}" in
+        r) REMOTE_PORT="${OPTARG}" ;;
+        s) REMOTE_HOST="${OPTARG}" ;;
+        d) REMOTE_DIR="${OPTARG}" ;; 
+        l) LOCAL_PORT="${OPTARG}" ;;
+        *) echo -e ${HELP_MSG} ; exit ;
+    esac
+done
+
+#echo  ${REMOTE_HOST} "launch-jupyter-notebook-server -p ${REMOTE_PORT}"
+#ssh  ${REMOTE_HOST} "/usr/local/bin/launch-juptyer-notebook-server -p ${REMOTE_PORT}"
+ssh ${REMOTE_HOST} /bin/bash << EOF
+    echo ${PATH}
+    nohup jupyter-notebook --no-browser --port=${REMOTE_PORT} > /dev/null &
+    until lsof -Pi :${REMOTE_PORT} -sTCP:LISTEN
+    do
+        echo waiting
+        sleep 1
+    done
+    lsof -Pi :${REMOTE_PORT} -sTCP:LISTEN | awk 'NR==2 {print \$2}' > $HOME/.jupyter-notebook-remote-pid.tmp
+EOF
+
+ssh -N -f -L localhost:${LOCAL_PORT}:localhost:${REMOTE_PORT} ${REMOTE_HOST}
+open -a /Applications/Google\ Chrome.app/ http://localhost:${LOCAL_PORT}
+
+read -p "Press any key to kill the notebook..." userInput
+ssh ${REMOTE_HOST} << 'EOF'
+    PID=`cat $HOME/.jupyter-notebook-remote-pid.tmp`
+    kill $PID
+EOF
