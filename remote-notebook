@@ -24,12 +24,9 @@ while getopts 'r:s:d:l:' flag; do
     esac
 done
 
-#echo  ${REMOTE_HOST} "launch-jupyter-notebook-server -p ${REMOTE_PORT}"
-#ssh  ${REMOTE_HOST} "/usr/local/bin/launch-juptyer-notebook-server -p ${REMOTE_PORT}"
 ssh ${REMOTE_HOST} /bin/bash << EOF
-    echo ${PATH}
     nohup jupyter-notebook --no-browser --port=${REMOTE_PORT} > /dev/null &
-    until lsof -Pi :${REMOTE_PORT} -sTCP:LISTEN
+    until lsof -Pi :${REMOTE_PORT} -sTCP:LISTEN > /dev/null
     do
         echo waiting
         sleep 1
