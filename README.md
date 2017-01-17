@@ -14,6 +14,8 @@ These scripts work for me on a 2015 MacBook Pro running macOS Sierra with GNU Ba
 69695 ttys000   05:13.20 -bash
 69696 ttys000   69:01.85 ./test.out
 
+>>> pwd
+/Users/tcmoore3
 >>> cdpsid 69696
 >>> pwd
 /Users/tcmoore3/test
