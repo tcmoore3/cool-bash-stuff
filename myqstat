@@ -1,0 +1,67 @@
+#!/usr/bin/python
+from collections import Counter
+import os
+import argparse
+
+
+username = 'tcmoore3'
+recognized_queues = ['short', 'low', 'medium', 'high']
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-n', nargs='?', const='all', dest='count', default=None)
+args = parser.parse_args()
+
+cnt = Counter()
+
+if args.count:
+    if args.count != 'all':
+        if args.count not in recognized_queues:
+            print('Unrecognized queue. Options are: %s' % recognized_queues)
+        else:
+            print len(os.popen("qstat -u %s | grep -i %s" % (username,
+                args.count)).read().splitlines())
+    else:
+        print len(os.popen('qstat -u %s' % username).readlines()[5:])
+    exit()
+
+x = os.popen('qstat -u %s' % username).readlines()[5:]
+max_jn, max_ji = 0, 0
+job_ids, out, job_names = [], [], []
+for entry in x:
+    job_id = entry.split('.')[0]
+    job_ids.append(job_id)
+    max_ji = max(max_ji, len(job_id))
+    job_name = os.popen("qstat -f %s | grep -i job_name" 
+            % job_id).read().split('\n')[0].split()[2]
+    job_names.append(job_name)
+    max_jn = max(max_jn, len(job_name))
+
+    queue = os.popen("qstat -f %s | grep -i queue" % job_id).read().split()[2]
+    req_time = entry.split()[8]
+    used_time = entry.split()[10]
+    if used_time == '-':
+        used_time = '00:00:00'
+    job_state = entry.split()[9]
+    cnt[job_state] += 1
+    out.append('{0}   {1} / {2}  {3:<5}'.format(
+        job_state, used_time, req_time, queue))
+
+first_space = ' ' * (max_ji - len('job_id') + 2)
+second_space = ' ' * (max_jn - len('job_name') + 2)
+print('')
+print("job_id %sjob_name%sst  u'd_t      r'd_t     queue" % (first_space, second_space))
+print('------%s --------%s--  -----      ------    -----' % (first_space, second_space))
+for i, line in enumerate(out):
+    first_space = ' ' * (max_ji - len(job_ids[i].split('.')[0]) + 2)
+    second_space = ' ' * (max_jn - len(job_names[i]) +2)
+    new_line = '%s %s%s%s' % (job_ids[i].split('.')[0], first_space, job_names[i], second_space)
+    new_line += line
+    print new_line
+
+if(len(out) == 0):
+    print 'YOU HAVE NO JOBS RUNNING YOU PIECE OF SHIT'
+else:
+    print '-------'
+    print '{0} jobs total'.format(len(out))
+    print '{0} jobs running'.format(cnt['R'])
+    print '{0} jobs in queue'.format(cnt['Q'])
